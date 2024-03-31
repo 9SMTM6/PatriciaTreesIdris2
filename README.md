@@ -1,4 +1,4 @@
-# Project
+# Project: A correct implementation of radix trees
 
 This will hopefully end up being an implementation of a Radixtree specifically with radix 2 (?) AKA Patricia tree in as much as possible typed throught idris2.
 
