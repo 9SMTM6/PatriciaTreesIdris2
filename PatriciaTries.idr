@@ -10,62 +10,116 @@
 module PatriciaTries
 
 import Data.Vect
+import Data.Fin
 
-data Trie : (len : Nat) -> (tVal : Type) -> Type where
-  Leaf : (val : tVal) -> Trie 0 tVal
-  Left : (l : Trie len tVal) -> Trie (S len) tVal
-  Right : (r : Trie len tVal) -> Trie (S len) tVal
-  Both : (l : Trie len tVal) -> (r : Trie len tVal) -> Trie (S len) tVal
+-- interface Concat a where
+--   concat : a -> a -> a
 
-Key : (len: Nat) -> Type
-Key len = Vect len Bool
+-- interface Concat a => Empty a where
+--   empty : a
 
--- IDK if I did this syntax properly
-singleton : {1 len: Nat} -> (key: Key len) -> (val: tVal) -> Trie len tVal
-singleton [] val = Leaf val
-singleton (x :: xs) val = do
-    let remainder = singleton xs val
-    case x of
-      True => Left remainder
-      False => Right remainder
+record BinNat where
+  constructor MkBin
+  inner: Nat
 
-insert : Key len -> tVal -> Trie len tVal -> Trie len tVal
-insert key val trie = ?todo
+-- interface
+-- Nat len => BinaryKey len where
+--   getPosition : (pos: Fin len) -> Bool
 
-lookup : Key len -> Trie len tVal -> Maybe tVal
+-- implementation
+-- Eq BinNat where
+--     (==) a b = a.inner == b.inner
 
-union : Trie len tVal -> Trie len tVal -> Trie len tVal
+-- -- main : IO ()
+-- -- main = do
+-- --   let a = MkBin 4
+-- --   let b = MkBin 4
+-- --   printLn (a == b)
+-- --   pure ()
 
--- todo theoreme
-intersection : Trie len tVal -> Trie len tVal -> Trie len tVal
+-- implementation
+-- BinaryKey 64 BinNat where
+--   getPosition pos = False
 
--- my own signature, should be fine
-delete: Key len -> Trie len tVal -> Trie len tVal
+-- implementation
+-- BinaryKey 64 Nat -> Nat where
+--   getPosition pos = False
 
--- delete: API TODO
+-- interface Trie len tVal where
+--   singleton : (key: BinaryKey len) -> (val: tVal) -> Trie len tVal
+--   insert : BinaryKey len -> tVal -> Trie len tVal -> Trie len tVal
+--   lookup : BinaryKey len -> Trie len tVal -> Maybe tVal
+--   intersection : Trie len tVal -> Trie len tVal -> Trie len tVal
+--   union : Trie len tVal -> Trie len tVal -> Trie len tVal
+--   delete: BinaryKey len -> Trie len tVal -> Trie len tVal
 
-theorem1 : (key: Key n) -> (val: tVal) -> (trie: Trie n tVal) -> lookup key (insert key val trie) = Just val
+-- data PrefixTree : (len : Nat) -> (tVal : Type) -> Type where
+--   Leaf : (val : tVal) -> PrefixTree 0 tVal
+--   Left : (l : PrefixTree len tVal) -> PrefixTree (S len) tVal
+--   Right : (r : PrefixTree len tVal) -> PrefixTree (S len) tVal
+--   Both : (l : PrefixTree len tVal) -> (r : PrefixTree len tVal) -> PrefixTree (S len) tVal
 
-theorem2 : (env: Void) -> union (singleton key val) trie = insert key val trie
+-- data TrieList : Type -> Type where
+--   WrapTrie : (xs: List tVal) -> TrieList tVal
 
--- theoreme das etwas gelöschtes weg ist
-theorem_delete_deletes : (env: Void) -> delete key (insert key val trie) = trie
+-- -- interface Trie len tVal => CorrectTrie len tVal where
+-- theorem1 : (key: BinaryKey len) -> (val: tVal) -> (trie: Trie len tVal) -> lookup key (insert key val trie) = Just val
 
--- TODO: show equivalence of Prefix tree and patricia tree
+-- implementation
+-- len Trie len TrieList where
+--   singleton key val = WrapTrie()
 
--- IDK about that, since the last one held the key implicitly with Left and Right, this doesnt really seem to do that, so IDK if the 2nd constructor makes sense
--- also the lenghts might not fit?
--- actually, that is n... is it perhaps just the tree depth?
--- hmmm. also die sache mit diesen prefix trees ist, das deren tiefe von den sets an keys abhängt. Ich glaube nicht das das in einer einfachen API beschreibbar ist...
--- also ist n nachher bloß die anzahl an elementen?
-data TrieV2 : (n : Nat) -> (a : Type) -> Type where
-  LeafV2 : (keyAdd: Key n) -> (val : a) -> TrieV2 n a
-  BothV2 : (keyAdd: Key n) -> (l : TrieV2 m a) -> (r : TrieV2 m a) -> TrieV2 (S(n + m)) a
+-- todo: implement Trie für PrefixTree and TrieList
 
--- TODO: show equivalence of simple trie (prefix tree) and patricia trie
+-- Key : (len: Nat) -> Type
+-- Key len = Vect len Bool
 
--- v3, weitergehend: Mache ich irgendwelche speziellen sachen, um die redizierte Entropie von utf-8 auszugleichen (die sich in der form nie ändern wird, z.b. kombinierte codepoints haben viele führende 1en)
--- (check in den haskell impls, ich glaube aber eher nicht)
--- 
--- was ist mit den impls, die einen einzigen String als Key backend nehmen? Das sol zu deutlichen performance verbesserungen führen.
--- vmtl dann v4? (mal schauen, wie einfach das wäre)
+-- -- IDK if I did this syntax properly
+-- singleton : (key: Key len) -> (val: tVal) -> Trie len tVal
+-- singleton [] val = Leaf val
+-- singleton (x :: xs) val = do
+--     let remainder = singleton xs val
+--     case x of
+--       True => Left remainder
+--       False => Right remainder
+
+-- insert : Key len -> tVal -> Trie len tVal -> Trie len tVal
+-- insert key val trie = ?todo
+
+-- lookup : Key len -> Trie len tVal -> Maybe tVal
+
+-- union : Trie len tVal -> Trie len tVal -> Trie len tVal
+
+-- -- todo theoreme
+-- intersection : Trie len tVal -> Trie len tVal -> Trie len tVal
+
+-- -- my own signature, should be fine
+-- delete: Key len -> Trie len tVal -> Trie len tVal
+
+-- -- delete: API TODO
+
+-- theorem1 : (key: Key n) -> (val: tVal) -> (trie: Trie n tVal) -> lookup key (insert key val trie) = Just val
+
+-- theorem2 : (env: Void) -> union (singleton key val) trie = insert key val trie
+
+-- -- theoreme das etwas gelöschtes weg ist
+-- theorem_delete_deletes : (env: Void) -> delete key (insert key val trie) = trie
+
+-- -- TODO: show equivalence of Prefix tree and patricia tree
+
+-- -- IDK about that, since the last one held the key implicitly with Left and Right, this doesnt really seem to do that, so IDK if the 2nd constructor makes sense
+-- -- also the lenghts might not fit?
+-- -- actually, that is n... is it perhaps just the tree depth?
+-- -- hmmm. also die sache mit diesen prefix trees ist, das deren tiefe von den sets an keys abhängt. Ich glaube nicht das das in einer einfachen API beschreibbar ist...
+-- -- also ist n nachher bloß die anzahl an elementen?
+-- data TrieV2 : (n : Nat) -> (a : Type) -> Type where
+--   LeafV2 : (keyAdd: Key n) -> (val : a) -> TrieV2 n a
+--   BothV2 : (keyAdd: Key n) -> (l : TrieV2 m a) -> (r : TrieV2 m a) -> TrieV2 (S(n + m)) a
+
+-- -- TODO: show equivalence of simple trie (prefix tree) and patricia trie
+
+-- -- v3, weitergehend: Mache ich irgendwelche speziellen sachen, um die redizierte Entropie von utf-8 auszugleichen (die sich in der form nie ändern wird, z.b. kombinierte codepoints haben viele führende 1en)
+-- -- (check in den haskell impls, ich glaube aber eher nicht)
+-- -- 
+-- -- was ist mit den impls, die einen einzigen String als Key backend nehmen? Das sol zu deutlichen performance verbesserungen führen.
+-- -- vmtl dann v4? (mal schauen, wie einfach das wäre)
