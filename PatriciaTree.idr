@@ -8,7 +8,7 @@ Key len = Vect len Bool
 data PatricaTree : (len : Nat) -> tVal -> Type where
     -- Empty : PatricaTree 0 tVal
     Leaf : 
-        -- {1 finLen : Nat} -> 
+        {finLen : Nat} -> 
         Key finLen -> (val: tVal) -> PatricaTree finLen tVal
     Node :
         -- I need these accessible in some methods (or at least its helpful and how I got to solutions the type checker accepts)
@@ -62,7 +62,6 @@ hlp_eqNotLt (S k) cmp with (cmp = (compareNat k k = LT))
         ?eq
     
     -- rewrite (sym cmp) in (hlp_eqNotLt k)
-    -- ?eq
 
 hlp_ifReduction : {len: Nat} -> (if (compareNat len len) == LT then len else len) = len
 hlp_ifReduction = ?red
@@ -85,8 +84,6 @@ insert : {len: Nat} -> Key len -> tVal -> PatricaTree len tVal -> PatricaTree le
 -- insert [] val Empty = Leaf [] val
 insert [] val (Leaf [] _) = ?ins_0
 -- Leaf [] val
--- insert (False :: xs) val Empty = rewrite (sym (plusZeroRightNeutral len)) in (Node xs (Leaf [] val) Empty)
--- insert (True :: xs) val Empty = rewrite (sym (plusZeroRightNeutral len)) in (Node xs Empty (Leaf [] val))
 insert (False :: xs) val (Node ys left right) = ?ins_4
 insert (True :: xs) val (Node ys left right) = ?ins_5
 insert (False :: _) _ (Leaf _ _) = ?ins_7
@@ -177,9 +174,6 @@ union (Leaf _ x) winner@(Leaf _ y) = ?un_2
 -- union only@(Node xs left right) Empty = only
 union (Leaf _ _) (Node _ _ _) = ?un_0
 union (Node _ _ _) (Leaf _ _) = ?un_1
-
--- todo: cleanup is missing!!
--- total
 
 total
 delete: Key len -> PatricaTree len tVal -> PatricaTree len tVal
