@@ -7,7 +7,7 @@ Key len = Vect len Bool
 
 data PatricaTree : (len : Nat) -> tVal -> Type where
     Empty : PatricaTree len tVal
-    Leaf : tVal -> PatricaTree 0 tVal
+    Leaf : {1 finLen : Nat} -> Key finLen -> (val: tVal) -> PatricaTree finLen tVal
     Node :
         -- I need these accessible in some methids (or at least its helpful and how I got to solutions the type checker accepts)
         -- order matters for these!
@@ -71,10 +71,10 @@ Show tVal => Show (PatricaTree len tVal) where
 
 total
 singleton : {1 len: Nat} -> Key len -> tVal -> PatricaTree len tVal
-singleton [] val = Leaf val
+singleton [] val = Leaf [] val
 -- and finally I understand rewrite rules. Somewhat. I have no idea how to use them in do blocks
-singleton (False :: postfix) val = rewrite sym (plusZeroRightNeutral len) in (Node postfix (Leaf val) Empty)
-singleton (True  :: postfix) val = rewrite sym (plusZeroRightNeutral len) in (Node postfix Empty (Leaf val))
+singleton (False :: postfix) val = rewrite sym (plusZeroRightNeutral len) in (Node postfix (Leaf [] val) Empty)
+singleton (True  :: postfix) val = rewrite sym (plusZeroRightNeutral len) in (Node postfix Empty (Leaf [] val))
 
 total
 %hint
@@ -115,12 +115,15 @@ hlp_findCommonPrefixLen (x :: xs) (y :: ys) =
 
 total
 insert : {len: Nat} -> Key len -> tVal -> PatricaTree len tVal -> PatricaTree len tVal
-insert [] val Empty = Leaf val
-insert [] val (Leaf x) = Leaf val
-insert (False :: xs) val Empty = rewrite (sym (plusZeroRightNeutral len)) in (Node xs (Leaf val) Empty)
-insert (True :: xs) val Empty = rewrite (sym (plusZeroRightNeutral len)) in (Node xs Empty (Leaf val))
+insert [] val Empty = Leaf [] val
+insert [] val (Leaf [] _) = ?ins_0
+-- Leaf [] val
+insert (False :: xs) val Empty = rewrite (sym (plusZeroRightNeutral len)) in (Node xs (Leaf [] val) Empty)
+insert (True :: xs) val Empty = rewrite (sym (plusZeroRightNeutral len)) in (Node xs Empty (Leaf [] val))
 insert (False :: xs) val (Node ys left right) = ?ins_4
 insert (True :: xs) val (Node ys left right) = ?ins_5
+insert (False :: _) _ (Leaf _ _) = ?ins_7
+insert (True :: _) _ (Leaf _ _) = ?ins_8
 -- insert [] val _ = Leaf val
 -- -- if held key has len 0, the node was in the split location already, so we recurse into the correct location
 -- insert (False :: xs) val (Node [] left right) = Node [] (insert xs val left) right
@@ -161,7 +164,7 @@ actualLen : (arg: PatricaTree len tVal) -> Nat
 total
 lookup : Key len -> PatricaTree len tVal -> Maybe tVal
 lookup [] Empty = Nothing
-lookup [] (Leaf x) = Just x
+lookup [] (Leaf [] x) = Just x
 lookup (False :: xs) Empty = Nothing
 lookup (True :: xs) Empty = Nothing
 lookup (False :: xs) (Node {prefixLen = pL} ys left _) = do
@@ -176,22 +179,30 @@ lookup (True :: xs) (Node {prefixLen = pL} ys _ right) = do
     if nodeMatchesLookup
         then lookup rem right
         else Nothing
+lookup (False :: _) (Leaf _ _) = ?lkp_1
+lookup (True :: _) (Leaf _ _) = ?lkp_2
 
 total
 intersection : {len:Nat} -> PatricaTree len tVal -> PatricaTree len tVal -> PatricaTree len tVal
 intersection Empty _ = Empty
 intersection _ Empty = Empty
-intersection (Leaf x) winner@(Leaf y) = winner
+intersection (Leaf _ x) winner@(Leaf _ y) = ?int_0
+-- winner
+intersection (Leaf _ _) (Node _ _ _) = ?int_1
+intersection (Node _ _ _) (Leaf _ _) = ?int_2
 
 total
 union : PatricaTree len tVal -> PatricaTree len tVal -> PatricaTree len tVal
 union Empty only = only
 union only Empty = only
-union (Leaf x) winner@(Leaf y) = winner
+union (Leaf _ x) winner@(Leaf _ y) = ?un_2
+-- winner
 -- this does not sit right with me...
 -- theres either case missing or something else I'm overlooking
 -- but it tests as total...
 union only@(Node xs left right) Empty = only
+union (Leaf _ _) (Node _ _ _) = ?un_0
+union (Node _ _ _) (Leaf _ _) = ?un_1
 
 -- todo: cleanup is missing!!
 -- total
@@ -199,10 +210,12 @@ union only@(Node xs left right) Empty = only
 total
 delete: Key len -> PatricaTree len tVal -> PatricaTree len tVal
 delete [] Empty = Empty
-delete [] (Leaf x) = Empty
+delete [] (Leaf _ x) = Empty
 delete (x :: xs) Empty = Empty
 delete (False :: xs) (Node {prefixLen = pL} ys left right) = Node ys (delete (drop pL xs) left) right
 delete (True :: xs) (Node {prefixLen = pL} ys left right) = Node ys left (delete (drop pL xs) right)
+delete (False :: _) (Leaf _ _) = ?del_0
+delete (True :: _) (Leaf _ _) = ?del_1
 
 exKey: Key 4
 exKey = [True, False, True, True]
@@ -214,9 +227,9 @@ exKey2 = [True, False, False, False]
 ex2 = singleton exKey2 5
 exUnion = union ex ex2
 ex3: PatricaTree 5 Nat
-ex3 = Node ([False, True]) (Node ([False]) (Leaf 5) (Leaf 4)) (Node ([False]) (Leaf 6) Empty)
+ex3 = Node ([False, True]) (Node ([False]) (Leaf [] 5) (Leaf [] 4)) (Node ([False]) (Leaf [] 6) Empty)
 ex4: PatricaTree 6 Nat
-ex4 = Node ([False, True]) (Node ([False]) (Node [] (Leaf 5) (Leaf 3)) (Node [] (Leaf 4) Empty)) (Node ([False, True]) (Leaf 6) Empty)
+ex4 = Node ([False, True]) (Node ([False]) (Node [] (Leaf [] 5) (Leaf [] 3)) (Node [] (Leaf [] 4) Empty)) (Node ([False, True]) (Leaf [] 6) Empty)
 -- exIns = insert
 
 -- main : IO ()
