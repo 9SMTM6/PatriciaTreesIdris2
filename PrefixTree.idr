@@ -186,6 +186,8 @@ intersection (Both lTrie0 rTrie0) (Both lTrie1 rTrie1) = do
 -- hlp_thm_whatever = cong2 lookup
 -- total
 
+total
+%hint
 thm_singletonContainsPair : (key: Key len) -> Main.lookup key (singleton key val) = Just val
 thm_singletonContainsPair [] = Refl
 -- hlp_thm_lookupLeafSingleton
@@ -207,6 +209,8 @@ hlp_thm_mapNothing = Refl
 -- stepUpKeyLen False (x :: xs) prf = ?stp --stepUpKeyLen x xs prf
 -- stepUpKeyLen True (x :: xs) prf = ?stepup_5
 
+total
+%hint
 thm_emptySingleton : {val: tVal} -> (key: Key len) -> Main.delete key (singleton key val) = Nothing
 thm_emptySingleton [] = Refl
 thm_emptySingleton (False :: xs) = cong (map Left) $ thm_emptySingleton xs
@@ -229,6 +233,7 @@ thm_lookupInserted (True :: xs) val (Both lTrie rTrie) = thm_lookupInserted xs v
 thm_lookupInserted (False :: xs) val (Right rTrie) = thm_singletonContainsPair xs
 thm_lookupInserted (True :: xs) val (Left lTrie) = thm_singletonContainsPair xs
 
+total
 thm_insertSingletonUnionEquivalence : (key: Key len) -> (trie: PrefixTree len tVal) -> union (singleton key val) trie = insert key val trie
 thm_insertSingletonUnionEquivalence [] (Leaf x) = ?what_4
 thm_insertSingletonUnionEquivalence key (Left lTrie) = ?what_1
